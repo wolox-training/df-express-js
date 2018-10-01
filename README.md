@@ -1,6 +1,6 @@
-# training
+# df-express-js
 
-training
+Training express js
 
 ## First steps
 

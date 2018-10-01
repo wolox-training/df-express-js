@@ -1,7 +1,7 @@
 {
-  "name": "training",
+  "name": "df-express-js",
   "version": "0.1.0",
-  "description": "training",
+  "description": "Training express js",
   "engines": {
     "node": "8.9.4",
     "npm": "2.14.2"
@@ -29,14 +29,14 @@
   ],
   "main": "app.js",
   "author": "Wolox",
-  "homepage": "https://github.com/Wolox/training",
+  "homepage": "https://github.com/Wolox/df-express-js",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wolox/training.git"
+    "url": "https://github.com/Wolox/df-express-js.git"
   },
   "bugs": {
-    "url": "https://github.com/Wolox/training/issues"
+    "url": "https://github.com/Wolox/df-express-js/issues"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
