@@ -9,11 +9,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      firstName: {
+      first_name: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      lastName: {
+      last_name: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -22,19 +22,18 @@ module.exports = {
         unique: true,
         type: Sequelize.STRING
       },
-      contraseña: {
+      password: {
         allowNull: false,
         unique: false,
         type: Sequelize.STRING
       },
       created_at: {
-        allowNull: false,
-        unique: false,
         type: Sequelize.DATE
       },
       updated_at: {
-        allowNull: false,
-        unique: false,
+        type: Sequelize.DATE
+      },
+      deleted_at: {
         type: Sequelize.DATE
       }
     });
