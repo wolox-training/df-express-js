@@ -20,10 +20,10 @@ exports.create = (req, res, next) => {
     const regex = new RegExp('^[0-9A-Za-z]+$');
     if (userEmail) {
       return next(errors.uniqueEmailError);
-    } else if (!params.email.includes(emailDomain)) {
+    } else if (!params.email || !params.email.includes(emailDomain)) {
       // wrong domain
       return next(errors.invalidEmailError);
-    } else if (params.contraseña.length < 8 || !regex.test(params.contraseña)) {
+    } else if (!params.contraseña || params.contraseña.length < 8 || !regex.test(params.contraseña)) {
       // short pass
       return next(errors.invalidPasswordError);
     } else {
