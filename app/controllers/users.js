@@ -9,7 +9,7 @@ exports.create = (req, res, next) => {
     ? {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        contraseña: req.body.contraseña,
+        password: req.body.password,
         email: req.body.email
       }
     : {};
@@ -23,14 +23,14 @@ exports.create = (req, res, next) => {
     } else if (!params.email || !params.email.includes(emailDomain)) {
       // wrong domain
       return next(errors.invalidEmailError);
-    } else if (!params.contraseña || params.contraseña.length < 8 || !regex.test(params.contraseña)) {
+    } else if (!params.password || params.password.length < 8 || !regex.test(params.password)) {
       // short pass
       return next(errors.invalidPasswordError);
     } else {
       // create user
       const saltRounds = 10;
-      bcrypt.hash(params.contraseña, saltRounds).then(hash => {
-        params.contraseña = hash;
+      bcrypt.hash(params.password, saltRounds).then(hash => {
+        params.password = hash;
         User.create(params)
           .then(newUser => {
             logger.info(`User with email ${newUser.email} correctly created`);
