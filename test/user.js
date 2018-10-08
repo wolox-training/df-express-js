@@ -15,6 +15,9 @@ describe('users', () => {
           email: '',
           password: '123ertyuiop'
         })
+        .then(res => {
+          res.body.should.not.have.property('newUser');
+        })
         .catch(err => {
           err.should.have.status(400);
           done();
@@ -56,6 +59,9 @@ describe('users', () => {
           email: 'reed.richards@wolox.com.ar',
           password: '2'
         })
+        .then(res => {
+          res.body.should.not.have.property('newUser');
+        })
         .catch(err => {
           err.should.have.status(400);
           done();
@@ -70,6 +76,9 @@ describe('users', () => {
           lastName: 'Rogers',
           email: 'steve.rogers@wolox.com.ar',
           password: '2.·%dasd'
+        })
+        .then(res => {
+          res.body.should.not.have.property('newUser');
         })
         .catch(err => {
           err.should.have.status(400);
@@ -89,6 +98,7 @@ describe('users', () => {
         .then(res => {
           res.should.have.status(200);
           res.should.be.json;
+          res.body.should.have.property('newUser');
           dictum.chai(res);
           done();
         });
