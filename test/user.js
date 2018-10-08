@@ -1,27 +1,30 @@
 const chai = require('chai'),
   dictum = require('dictum.js'),
   server = require('./../app'),
-  should = chai.should();
+  should = chai.should(),
+  User = require('./../app/models').user;
 
 describe('users', () => {
   describe('/users POST', () => {
     it('should fail because email is missing or invalid', done => {
-      chai
-        .request(server)
-        .post('/users')
-        .send({
-          firstName: 'Wanda',
-          lastName: 'Maximoff',
-          email: '',
-          password: '123ertyuiop'
-        })
-        .then(res => {
-          res.body.should.not.have.property('newUser');
-        })
-        .catch(err => {
-          err.should.have.status(400);
-          done();
-        });
+      User.count().then(cantUsers => {
+        chai
+          .request(server)
+          .post('/users')
+          .send({
+            firstName: 'Wanda',
+            lastName: 'Maximoff',
+            email: '',
+            password: '2wersdf34e'
+          })
+          .catch(err => {
+            User.count().then(cantUsersAfter => {
+              cantUsersAfter.should.be.eql(cantUsers);
+              err.should.have.status(400);
+              done();
+            });
+          });
+      });
     });
     it('should fail because email is in use', done => {
       chai
@@ -34,74 +37,87 @@ describe('users', () => {
           password: '123waerdfg'
         })
         .then(res => {
-          chai
-            .request(server)
-            .post('/users')
-            .send({
-              firstName: 'Peter',
-              lastName: 'Parker',
-              email: 'tony.stark@wolox.com.ar',
-              password: 'password'
-            })
-            .catch(err => {
-              err.should.have.status(400);
-              done();
-            });
+          User.count().then(cantUsers => {
+            chai
+              .request(server)
+              .post('/users')
+              .send({
+                firstName: 'Peter',
+                lastName: 'Parker',
+                email: 'tony.stark@wolox.com.ar',
+                password: '123edfgbnm'
+              })
+              .catch(err => {
+                User.count().then(cantUsersAfter => {
+                  cantUsersAfter.should.be.eql(cantUsers);
+                  err.should.have.status(400);
+                  done();
+                });
+              });
+          });
         });
     });
     it('should fail because password is too short', done => {
-      chai
-        .request(server)
-        .post('/users')
-        .send({
-          firstName: 'Reed',
-          lastName: 'Richards',
-          email: 'reed.richards@wolox.com.ar',
-          password: '2'
-        })
-        .then(res => {
-          res.body.should.not.have.property('newUser');
-        })
-        .catch(err => {
-          err.should.have.status(400);
-          done();
-        });
+      User.count().then(cantUsers => {
+        chai
+          .request(server)
+          .post('/users')
+          .send({
+            firstName: 'Reed',
+            lastName: 'Richard',
+            email: 'reed.richard@wolox.com.ar',
+            password: '2'
+          })
+          .catch(err => {
+            User.count().then(cantUsersAfter => {
+              cantUsersAfter.should.be.eql(cantUsers);
+              err.should.have.status(400);
+              done();
+            });
+          });
+      });
     });
     it('should fail because password is non-alphanumeric', done => {
-      chai
-        .request(server)
-        .post('/users')
-        .send({
-          firstName: 'Steve',
-          lastName: 'Rogers',
-          email: 'steve.rogers@wolox.com.ar',
-          password: '2.·%dasd'
-        })
-        .then(res => {
-          res.body.should.not.have.property('newUser');
-        })
-        .catch(err => {
-          err.should.have.status(400);
-          done();
-        });
+      User.count().then(cantUsers => {
+        chai
+          .request(server)
+          .post('/users')
+          .send({
+            firstName: 'Juan',
+            lastName: 'Carlos',
+            email: 'juan.carlos@wolox.com.ar',
+            password: '123,&er.·'
+          })
+          .catch(err => {
+            User.count().then(cantUsersAfter => {
+              cantUsersAfter.should.be.eql(cantUsers);
+              err.should.have.status(400);
+              done();
+            });
+          });
+      });
     });
     it('should be successful', done => {
-      chai
-        .request(server)
-        .post('/users')
-        .send({
-          firstName: 'Stephen',
-          lastName: 'Strange',
-          email: 'steph.strange@wolox.com.ar',
-          password: '123waerdfg'
-        })
-        .then(res => {
-          res.should.have.status(200);
-          res.should.be.json;
-          res.body.should.have.property('newUser');
-          dictum.chai(res);
-          done();
-        });
+      User.count().then(cantUsers => {
+        chai
+          .request(server)
+          .post('/users')
+          .send({
+            firstName: 'Stephen',
+            lastName: 'Strange',
+            email: 'steph.strange@wolox.com.ar',
+            password: '123waerdfg'
+          })
+          .then(res => {
+            User.count().then(cantUsersAfter => {
+              cantUsersAfter.should.be.eql(cantUsers + 1);
+              res.should.have.status(200);
+              res.should.be.json;
+              dictum.chai(res);
+              done();
+            });
+          });
+      });
     });
   });
 });
