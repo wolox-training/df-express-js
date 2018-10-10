@@ -1,7 +1,8 @@
 const logger = require('../logger'),
   User = require('../models').user,
   bcrypt = require('bcryptjs'),
-  errors = require('../errors');
+  errors = require('../errors'),
+  sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
   const emailDomain = '@wolox.com.ar';
@@ -43,4 +44,46 @@ exports.create = (req, res, next) => {
       });
     }
   });
+};
+
+exports.login = (req, res, next) => {
+  const params = req.body
+      ? {
+          email: req.body.email,
+          password: req.body.password
+        }
+      : {},
+    emailDomain = '@wolox.com.ar',
+    token = sessionManager.encode({ email: params.email }),
+    headerToken = req.headers.authorization;
+  logger.info(`Attempting to log user with email ${params.email}`);
+  User.findOne({ where: { email: params.email } })
+    .then(userDB => {
+      if (!userDB || (params.email && !params.email.includes(emailDomain))) {
+        return next(errors.invalidEmailError);
+      } else if (!params.password) {
+        logger.info(`User has an invalid password`);
+        next(errors.invalidPasswordError);
+      } else {
+        if (!headerToken || headerToken !== token) {
+          bcrypt.compare(params.password, userDB.password).then(isValid => {
+            if (isValid) {
+              logger.info(`User correctly Sign in`);
+              res.set(sessionManager.HEADER_NAME, token);
+              res.status(200).send({ userDB });
+            } else {
+              logger.info(`User has an invalid password`);
+              next(errors.invalidPasswordError);
+            }
+          });
+        } else {
+          logger.info(`User is already Logged`);
+          res.status(200).send('User is already Logged');
+        }
+      }
+    })
+    .catch(error => {
+      logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
+      next(error);
+    });
 };
