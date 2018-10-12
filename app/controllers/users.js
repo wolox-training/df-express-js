@@ -87,3 +87,23 @@ exports.login = (req, res, next) => {
       next(error);
     });
 };
+
+exports.userList = (req, res, next) => {
+  const limit = 2,
+    page = req.params.page,
+    offset = (page - 1) * limit,
+    props = {};
+  User.getAll(props, offset, limit)
+    .then(usersDB => {
+      if (usersDB.length > 0) {
+        logger.info(`User get the List successfull`);
+        res.status(200).send({ usersDB });
+      } else {
+        return next(errors.invalidUserPage);
+      }
+    })
+    .catch(error => {
+      logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
+      next(error);
+    });
+};

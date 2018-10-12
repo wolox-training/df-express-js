@@ -14,3 +14,9 @@ exports.invalidEmailError = { statusCode: 400, message: exports.INVALID_EMAIL_ER
 
 exports.INVALID_PASSWORD_ERROR = 'Invalid Password';
 exports.invalidPasswordError = { statusCode: 400, message: exports.INVALID_PASSWORD_ERROR };
+
+exports.INVALID_TOKEN_AUTH = 'You are not logged';
+exports.invalidTokenAuth = { statusCode: 400, message: exports.INVALID_TOKEN_AUTH };
+
+exports.INVALID_USER_PAGE = 'Sorry, page does not exist';
+exports.invalidUserPage = { statusCode: 400, message: exports.INVALID_USER_PAGE };
