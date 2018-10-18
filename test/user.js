@@ -28,12 +28,12 @@ const usersList = {
     firstName: 'Reed',
     lastName: 'Richards',
     email: 'badEmail',
-    password: '123qwe673'
+    password: '123abc123'
   },
   userWithShortPass: {
-    firstName: 'Victor',
-    lastName: 'Von Doom',
-    email: 'victor.doom@wolox.com.ar',
+    firstName: 'Albert',
+    lastName: 'Albondiga',
+    email: 'albert.albond@wolox.com.ar',
     password: '123'
   },
   userWithInvalidPass: {
@@ -129,6 +129,30 @@ describe('users', () => {
       });
     });
 
+    it('should fail login because email dose not exist', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'inexistent.email@wolox.com', password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should fail login because email is missing', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
     it('should fail login because of invalid password', done => {
       logAnUser(usersList.userWithInvalidPass).catch(err => {
         err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
@@ -138,21 +162,30 @@ describe('users', () => {
     });
 
     it('should fail because user already logged in', done => {
-      createAnUser(usersList.userOneCorrect).then(() => {
-        logAnUser(usersList.userOneCorrect).then(res => {
-          logAnUser(usersList.userOneCorrect)
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
+        .then(res => {
+          chai
+            .request(server)
+            .post('/users/sessions')
             .set('authorization', res.headers.authorization)
-            .then(resolve => {
+            .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
+            .catch(err => {
               res.headers.should.have.property(sessionManager.HEADER_NAME);
-              resolve.should.have.status(200);
+              err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+              err.should.have.status(400);
               done();
             });
         });
-      });
     });
     it('should be successful logged in', done => {
-      createAnUser(usersList.userTwoCorrect).then(() => {
-        logAnUser(usersList.userTwoCorrect).then(res => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'maxi.mon@wolox.com.ar', password: '123456789' })
+        .then(res => {
           res.headers.should.have.property(sessionManager.HEADER_NAME);
           res.should.have.status(200);
           done();
@@ -161,7 +194,7 @@ describe('users', () => {
     });
   });
 
-  describe('/users/:id POST', () => {
+  describe('/users/:page POST', () => {
     it('should get the User List successfully', done => {
       createAnUser(usersList.userOneCorrect).then(() => {
         createAnUser(usersList.userTwoCorrect).then(() => {
@@ -215,5 +248,5 @@ describe('users', () => {
         });
       });
     });
-  });
+
 });

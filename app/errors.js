@@ -12,6 +12,12 @@ exports.uniqueEmailError = { statusCode: 400, message: exports.UNIQUE_EMAIL_ERRO
 exports.INVALID_EMAIL_ERROR = 'Invalid email';
 exports.invalidEmailError = { statusCode: 400, message: exports.INVALID_EMAIL_ERROR };
 
+exports.INEXISTANT_EMAIL = 'Email does not exist';
+exports.inexistentEmail = { statusCode: 400, message: exports.INEXISTANT_EMAIL };
+
+exports.BAD_EMAIL_REQ = 'bad email request';
+exports.badEmailReq = { statusCode: 400, message: exports.BAD_EMAIL_REQ };
+
 exports.INVALID_PASSWORD_ERROR = 'Invalid Password';
 exports.invalidPasswordError = { statusCode: 400, message: exports.INVALID_PASSWORD_ERROR };
 
@@ -20,3 +26,9 @@ exports.invalidTokenAuth = { statusCode: 400, message: exports.INVALID_TOKEN_AUT
 
 exports.INVALID_USER_PAGE = 'Sorry, page does not exist';
 exports.invalidUserPage = { statusCode: 400, message: exports.INVALID_USER_PAGE };
+
+exports.BAD_PASS_REQ = 'not password send';
+exports.badPassReq = { statusCode: 400, message: exports.BAD_PASS_REQ };
+
+exports.USER_ALREADY_LOG = 'User is already logged-in';
+exports.userAlreadyLog = { statusCode: 400, message: exports.USER_ALREADY_LOG };
