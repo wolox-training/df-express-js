@@ -8,8 +8,12 @@ exports.tokenAuthentication = (req, res, next) => {
   if (auth) {
     const email = sessionManager.decode(auth);
     User.findOne({ where: email }).then(logUser => {
-      req.body.user = email;
-      next();
+      if (logUser) {
+        req.userInfo = logUser;
+        next();
+      } else {
+        return next(errors.invalidTokenAuth);
+      }
     });
   } else {
     return next(errors.invalidTokenAuth);

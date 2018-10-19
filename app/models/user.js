@@ -1,4 +1,6 @@
-const errors = require('../errors');
+const errors = require('../errors'),
+  config = require('./../../config'),
+  paging = config.paging;
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
@@ -31,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  User.getAll = (props, offset = 0, limit = 5) => {
+  User.getPagedUsers = (props, offset = paging.offset, limit = paging.limit) => {
     return User.findAll({
       where: props,
       offset,

@@ -2,6 +2,7 @@ const logger = require('../logger'),
   User = require('../models').user,
   bcrypt = require('bcryptjs'),
   errors = require('../errors'),
+  usersToShow = require('./../helpers/index').usersToShow,
   sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
@@ -103,18 +104,14 @@ exports.login = (req, res, next) => {
 };
 
 exports.userList = (req, res, next) => {
-  const limit = 2,
-    page = req.params.page,
+  const limit = req.query.limit,
+    page = req.query.page,
     offset = (page - 1) * limit,
     props = {};
-  User.getAll(props, offset, limit)
-    .then(usersDB => {
-      if (usersDB.length > 0) {
-        logger.info(`User get the List successfull`);
-        res.status(200).send({ usersDB });
-      } else {
-        return next(errors.invalidUserPage);
-      }
+  User.getPagedUsers(props, offset, limit)
+    .then(users => {
+      logger.info(`User get the List successfull`);
+      res.status(200).send(usersToShow(users));
     })
     .catch(error => {
       logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
