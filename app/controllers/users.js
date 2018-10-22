@@ -118,3 +118,33 @@ exports.userList = (req, res, next) => {
       next(error);
     });
 };
+
+exports.createAdmin = (req, res, next) => {
+  if (req.newUser) {
+    // Crea el nuevo usuario como admin, porque no existia
+    const saltRounds = 10;
+    bcrypt.hash(req.newUser.password, saltRounds).then(hash => {
+      req.newUser.password = hash;
+      User.create(req.newUser)
+        .then(newUser => {
+          logger.info(`User with email ${newUser.email} correctly created`);
+          res.status(200).send({ newUser });
+        })
+        .catch(error => {
+          logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
+          next(error);
+        });
+    });
+  } else {
+    // Como el usuario existe, lo actualiza...
+    req.userDB
+      .update(req.body)
+      .then(u => {
+        const auth = sessionManager.encode({ email: u.email });
+        res.status(200);
+        res.set(sessionManager.HEADER_NAME, auth);
+        res.send(u);
+      })
+      .catch(next);
+  }
+};

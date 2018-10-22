@@ -170,4 +170,45 @@ describe('/users GET', () => {
         });
     });
   });
+
+  describe('/admin/users POST', () => {
+    it('should fail because user is not logged', done => {
+      User.findOne({ where: { email: 'maxi.mon@wolox.com.ar' } }).then(userDB => {
+        chai
+          .request(server)
+          .post('/admin/users')
+          .send({
+            firstName: 'Maxi',
+            lastName: 'Monzo',
+            email: 'maxi.mon@wolox.com.ar',
+            password: '123456789',
+            isAdmin: 'true'
+          })
+          .catch(err => {
+            userDB.isAdmin.should.be.eql('false');
+            err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+            err.should.have.status(400);
+            done();
+          });
+      });
+    });
+
+    it('should fail because user is not logged', done => {
+      chai
+        .request(server)
+        .post('/admin/users')
+        .send({
+          firstName: 'Maxi',
+          lastName: 'Monzo',
+          email: 'maxi.mon@wolox.com.ar',
+          password: '123456789',
+          isAdmin: 'true'
+        })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+  });
 });
