@@ -4,6 +4,7 @@ const chai = require('chai'),
   should = chai.should(),
   User = require('./../app/models').user,
   sessionManager = require('./../app/services/sessionManager'),
+  nock = require('nock'),
   usersList = require('./support/users').usersList;
 
 const createUser = userParams => {
@@ -24,6 +25,10 @@ const createAdmin = userParams => {
     .request(server)
     .post('/admin/users')
     .send(userParams);
+};
+
+const getAlbumsInfo = () => {
+  return chai.request(server).get('/albums');
 };
 
 describe('users', () => {
@@ -261,6 +266,38 @@ describe('/users GET', () => {
               done();
             });
           });
+      });
+    });
+  });
+
+  describe('/albums GET', () => {
+    beforeEach(() => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com')
+        .get('/albums')
+        .reply(200, {
+          userId: 1,
+          id: 3,
+          title: 'omnis laborum odio'
+        });
+    });
+    it('should get the albums information succesfully', done => {
+      logUser(usersList.userInDB).then(userLog => {
+        getAlbumsInfo()
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            res.should.have.status(200);
+            res.body.userId.should.be.eql(1);
+            done();
+          });
+      });
+    });
+    it('should fail getting the albums information because user is not logged', done => {
+      logUser(usersList.userInDB).then(userLog => {
+        getAlbumsInfo().catch(err => {
+          err.response.body.should.not.have.property('userId');
+          err.should.have.status(498);
+          done();
+        });
       });
     });
   });

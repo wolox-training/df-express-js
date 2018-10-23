@@ -3,6 +3,7 @@ const logger = require('../logger'),
   bcrypt = require('bcryptjs'),
   errors = require('../errors'),
   usersToShow = require('./../helpers/index').usersToShow,
+  axios = require('axios'),
   sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
@@ -147,4 +148,18 @@ exports.createAdmin = (req, res, next) => {
       })
       .catch(next);
   }
+};
+
+exports.getAlbums = (req, res, next) => {
+  axios
+    .get('https://jsonplaceholder.typicode.com/albums')
+    .then(response => {
+      logger.info(`All albums were listed succesfully`);
+      res.send(response.data);
+      res.status(200);
+    })
+    .catch(error => {
+      logger.error(`JSONPlaceholder API Error. Details:${JSON.stringify(error)}`);
+      next(error);
+    });
 };
