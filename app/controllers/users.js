@@ -121,7 +121,7 @@ exports.userList = (req, res, next) => {
 
 exports.createAdmin = (req, res, next) => {
   if (req.newUser) {
-    // Crea el nuevo usuario como admin, porque no existia
+    // Create a new Admin User
     const saltRounds = 10;
     bcrypt.hash(req.newUser.password, saltRounds).then(hash => {
       req.newUser.password = hash;
@@ -136,7 +136,7 @@ exports.createAdmin = (req, res, next) => {
         });
     });
   } else {
-    // Como el usuario existe, lo actualiza...
+    // User already exist, so update him to adm
     req.userDB
       .update(req.body)
       .then(u => {
