@@ -21,6 +21,40 @@ exports.usersList = {
     password: '123qwe673'
   },
   userInDB: {
+    firstName: 'Maxi',
+    lastName: 'Monzo',
+    email: 'maxi.mon@wolox.com.ar',
+    password: '123456789'
+  },
+  userInDBwrongName: {
+    firstName: 'wrongName',
+    lastName: 'Juarros',
+    email: 'juan.juarroz@wolox.com.ar',
+    password: '123456789',
+    isAdmin: 'true'
+  },
+  userInDBwrongPassword: {
+    firstName: 'Juan',
+    lastName: 'Juarros',
+    email: 'juan.juarroz@wolox.com.ar',
+    password: '123abc678',
+    isAdmin: 'true'
+  },
+  newAdmin: {
+    firstName: 'Reed',
+    lastName: 'Richards',
+    email: 'reed.richh@wolox.com.ar',
+    password: '123456789',
+    isAdmin: 'true'
+  },
+  updateUserToAdmin: {
+    firstName: 'Maxi',
+    lastName: 'Monzo',
+    email: 'maxi.mon@wolox.com.ar',
+    password: '123456789',
+    isAdmin: 'true'
+  },
+  adminUserInDB: {
     firstName: 'Alberto',
     lastName: 'Albondiga',
     email: 'albert.albond@wolox.com.ar',

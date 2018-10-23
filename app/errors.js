@@ -29,3 +29,9 @@ exports.badPassReq = { statusCode: 400, message: exports.BAD_PASS_REQ };
 
 exports.USER_ALREADY_LOG = 'User is already logged-in';
 exports.userAlreadyLog = { statusCode: 400, message: exports.USER_ALREADY_LOG };
+
+exports.INVALID_NAME = 'The Name is not correct';
+exports.invalidName = { statusCode: 400, message: exports.INVALID_NAME };
+
+exports.NOT_ADMIN_USER = 'User does not have admin Permissions';
+exports.notAdminUser = { statusCode: 401, message: exports.NOT_ADMIN_USER };

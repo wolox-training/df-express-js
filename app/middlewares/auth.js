@@ -60,20 +60,22 @@ exports.signUpValidation = (req, res, next) => {
   User.findOne({ where: { email: params.email } }).then(userDB => {
     if (!userDB) {
       req.newUser = req.body;
-      next();
-    } else {
-      bcrypt.compare(params.password, userDB.password).then(isValid => {
-        if (isValid) {
-          const saltRounds = 10;
-          bcrypt.hash(params.password, saltRounds).then(hash => {
-            req.userDB = userDB;
-            req.body.password = hash;
-            next();
-          });
-        } else {
-          return next(errors.invalidPasswordError);
-        }
-      });
+      return next();
     }
+    if (userDB.firstName !== params.firstName || userDB.lastName !== params.lastName) {
+      return next(errors.invalidName);
+    }
+    bcrypt.compare(params.password, userDB.password).then(isValid => {
+      if (isValid) {
+        const saltRounds = 10;
+        bcrypt.hash(params.password, saltRounds).then(hash => {
+          req.userDB = userDB;
+          req.body.password = hash;
+          next();
+        });
+      } else {
+        return next(errors.invalidPasswordError);
+      }
+    });
   });
 };
