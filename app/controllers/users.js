@@ -1,7 +1,8 @@
 const logger = require('../logger'),
   User = require('../models').user,
   bcrypt = require('bcryptjs'),
-  errors = require('../errors');
+  errors = require('../errors'),
+  sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
   const emailDomain = '@wolox.com.ar';
@@ -43,4 +44,60 @@ exports.create = (req, res, next) => {
       });
     }
   });
+};
+
+exports.login = (req, res, next) => {
+  const params = req.body
+      ? {
+          email: req.body.email,
+          password: req.body.password
+        }
+      : {},
+    emailDomain = '@wolox.com.ar',
+    regex = new RegExp('^[0-9A-Za-z]+$'),
+    headerToken = req.headers.authorization;
+  logger.info(`Attempting to log user with email ${params.email}`);
+  if (!params.email) {
+    logger.info(`The email is missing`);
+    return next(errors.badEmailReq);
+  }
+  if (!params.email.includes(emailDomain)) {
+    logger.info(`User has an invalid email`);
+    return next(errors.invalidEmailError);
+  }
+  if (!params.password) {
+    logger.info(`The password is missing`);
+    return next(errors.badPassReq);
+  }
+  if (params.password.length < 8 || !regex.test(params.password)) {
+    logger.info(`User has an invalid password`);
+    return next(errors.invalidPasswordError);
+  }
+  const token = sessionManager.encode({ email: params.email });
+  return User.findOne({ where: { email: params.email } })
+    .then(userDB => {
+      if (!userDB) {
+        logger.info(`User does not exist`);
+        return next(errors.inexistentEmail);
+      }
+      if (!headerToken || headerToken !== token) {
+        bcrypt.compare(params.password, userDB.password).then(isValid => {
+          if (isValid) {
+            logger.info(`User correctly Sign in`);
+            res.set(sessionManager.HEADER_NAME, token);
+            res.status(200).send({ userDB });
+          } else {
+            logger.info(`User has an invalid password`);
+            return next(errors.invalidPasswordError);
+          }
+        });
+      } else {
+        logger.info(`User is already logged-in`);
+        return next(errors.userAlreadyLog);
+      }
+    })
+    .catch(error => {
+      logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
+      return next(error);
+    });
 };

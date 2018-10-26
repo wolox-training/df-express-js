@@ -4,4 +4,5 @@ exports.init = app => {
   // app.get('/endpoint/get/path', [], controller.methodGET);
   // app.put('/endpoint/put/path', [], controller.methodPUT);
   app.post('/users', [], controller.create);
+  app.post('/users/sessions', [], controller.login);
 };

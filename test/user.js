@@ -2,7 +2,8 @@ const chai = require('chai'),
   dictum = require('dictum.js'),
   server = require('./../app'),
   should = chai.should(),
-  User = require('./../app/models').user;
+  User = require('./../app/models').user,
+  sessionManager = require('./../app/services/sessionManager');
 
 describe('users', () => {
   describe('/users POST', () => {
@@ -118,6 +119,87 @@ describe('users', () => {
             });
           });
       });
+    });
+  });
+
+  describe('/users/sessions POST', () => {
+    it('should fail login because of invalid email', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'invalidEmail', password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should fail login because email dose not exist', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'inexistent.email@wolox.com', password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should fail login because email is missing', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should fail login because of invalid password', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'albert.albond@wolox.com.ar', password: '123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should fail because user already logged in', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
+        .then(res => {
+          chai
+            .request(server)
+            .post('/users/sessions')
+            .set('authorization', res.headers.authorization)
+            .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
+            .catch(err => {
+              res.headers.should.have.property(sessionManager.HEADER_NAME);
+              err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+              err.should.have.status(400);
+              done();
+            });
+        });
+    });
+    it('should be successful logged in', done => {
+      chai
+        .request(server)
+        .post('/users/sessions')
+        .send({ email: 'maxi.mon@wolox.com.ar', password: '123456789' })
+        .then(res => {
+          res.headers.should.have.property(sessionManager.HEADER_NAME);
+          res.should.have.status(200);
+          done();
+        });
     });
   });
 });
