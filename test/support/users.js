@@ -26,6 +26,12 @@ exports.usersList = {
     email: 'maxi.mon@wolox.com.ar',
     password: '123456789'
   },
+  userWithOneAlbum: {
+    firstName: 'Alberto',
+    lastName: 'Albondiga',
+    email: 'albert.albond@wolox.com.ar',
+    password: '123456789'
+  },
   userInDBwrongName: {
     firstName: 'wrongName',
     lastName: 'Juarros',

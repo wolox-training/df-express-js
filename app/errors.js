@@ -22,7 +22,7 @@ exports.INVALID_PASSWORD_ERROR = 'Invalid Password';
 exports.invalidPasswordError = { statusCode: 400, message: exports.INVALID_PASSWORD_ERROR };
 
 exports.INVALID_TOKEN_AUTH = 'You are not logged';
-exports.invalidTokenAuth = { statusCode: 498, message: exports.INVALID_TOKEN_AUTH };
+exports.invalidTokenAuth = { statusCode: 401, message: exports.INVALID_TOKEN_AUTH };
 
 exports.BAD_PASS_REQ = 'not password send';
 exports.badPassReq = { statusCode: 400, message: exports.BAD_PASS_REQ };
@@ -35,3 +35,9 @@ exports.invalidName = { statusCode: 400, message: exports.INVALID_NAME };
 
 exports.NOT_ADMIN_USER = 'User does not have admin Permissions';
 exports.notAdminUser = { statusCode: 401, message: exports.NOT_ADMIN_USER };
+
+exports.ALBUM_ALREADY_PURCHASED = 'User already buy the album';
+exports.albumAlreadyPurchased = { statusCode: 400, message: exports.ALBUM_ALREADY_PURCHASED };
+
+exports.INEXISTENT_ALBUM = 'Albums does not exist';
+exports.inexistentAlbum = { statusCode: 404, message: exports.INEXISTENT_ALBUM };

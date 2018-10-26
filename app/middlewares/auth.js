@@ -2,6 +2,7 @@ const sessionManager = require('./../services/sessionManager'),
   User = require('../models').user,
   errors = require('../errors'),
   bcrypt = require('bcryptjs'),
+  Album = require('../models').album,
   logger = require('../logger');
 
 exports.tokenAuthentication = (req, res, next) => {

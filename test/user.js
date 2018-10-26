@@ -5,6 +5,7 @@ const chai = require('chai'),
   User = require('./../app/models').user,
   sessionManager = require('./../app/services/sessionManager'),
   nock = require('nock'),
+  Album = require('./../app/models').album,
   usersList = require('./support/users').usersList;
 
 const createUser = userParams => {
@@ -29,6 +30,10 @@ const createAdmin = userParams => {
 
 const getAlbumsInfo = () => {
   return chai.request(server).get('/albums');
+};
+
+const buyAlbum = albumId => {
+  return chai.request(server).post(`/albums/${albumId}`);
 };
 
 describe('users', () => {
@@ -177,7 +182,7 @@ describe('/users GET', () => {
         .send({ email: 'pet.parker@wolox.com.ar', password: '123abc123' })
         .catch(err => {
           err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(498);
+          err.should.have.status(401);
           done();
         });
     });
@@ -190,7 +195,7 @@ describe('/users GET', () => {
           userDB.reload().then(reloadDB => {
             reloadDB.isAdmin.should.be.eql(false);
             err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-            err.should.have.status(498);
+            err.should.have.status(401);
             done();
           });
         });
@@ -295,8 +300,98 @@ describe('/users GET', () => {
       logUser(usersList.userInDB).then(userLog => {
         getAlbumsInfo().catch(err => {
           err.response.body.should.not.have.property('userId');
-          err.should.have.status(498);
+          err.should.have.status(401);
           done();
+        });
+      });
+    });
+  });
+
+  describe('/albums/:id POST', () => {
+    it('should fail buying the album because user is not logged', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      logUser(usersList.userInDB).then(userLog => {
+        Album.count().then(totalAlbumsPurchasedBeforeBuy => {
+          buyAlbum(1).catch(err => {
+            Album.count().then(totalAlbumsAfterBuy => {
+              totalAlbumsAfterBuy.should.be.eql(totalAlbumsPurchasedBeforeBuy);
+              err.should.have.status(401);
+              done();
+            });
+          });
+        });
+      });
+    });
+    it('should buy the album succesfully', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      Album.count().then(totalAlbumsPurchasedBeforeBuy => {
+        logUser(usersList.userInDB).then(userLog => {
+          buyAlbum(1)
+            .set('authorization', userLog.headers.authorization)
+            .then(res => {
+              Album.count().then(totalAlbumsAfterBuy => {
+                totalAlbumsAfterBuy.should.be.eql(totalAlbumsPurchasedBeforeBuy + 1);
+                res.should.have.status(200);
+                dictum.chai(res);
+                done();
+              });
+            });
+        });
+      });
+    });
+    it('should fail buying the album because user already buy it', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      logUser(usersList.userWithOneAlbum).then(userLog => {
+        buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(resolve => {
+            Album.count().then(totalAlbumsPurchasedBeforeBuy => {
+              buyAlbum(1)
+                .set('authorization', userLog.headers.authorization)
+                .catch(err => {
+                  Album.count().then(totalAlbumsAfterBuy => {
+                    totalAlbumsAfterBuy.should.be.eql(totalAlbumsPurchasedBeforeBuy);
+                    err.should.have.status(400);
+                    done();
+                  });
+                });
+            });
+          });
+      });
+    });
+    it('should fail buying the album because album does not exist', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/155')
+        .reply(200, {});
+      logUser(usersList.userInDB).then(userLog => {
+        Album.count().then(totalAlbumsPurchasedBeforeBuy => {
+          buyAlbum(155)
+            .set('authorization', userLog.headers.authorization)
+            .catch(err => {
+              Album.count().then(totalAlbumsAfterBuy => {
+                totalAlbumsAfterBuy.should.be.eql(totalAlbumsPurchasedBeforeBuy);
+                err.should.have.status(404);
+                done();
+              });
+            });
         });
       });
     });
