@@ -244,7 +244,7 @@ describe('/users GET', () => {
           .then(newAdm => {
             User.findOne({ where: { email: usersList.newAdmin.email } }).then(newUserAdm => {
               newUserAdm.isAdmin.should.be.eql(true);
-              newAdm.should.have.status(200);
+              newAdm.should.have.status(201);
               done();
             });
           });

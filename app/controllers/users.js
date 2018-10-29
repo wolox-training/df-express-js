@@ -128,7 +128,7 @@ exports.createAdmin = (req, res, next) => {
       User.create(req.newUser)
         .then(newUser => {
           logger.info(`User with email ${newUser.email} correctly created`);
-          res.status(200).send({ newUser });
+          res.status(201).send({ newUser });
         })
         .catch(error => {
           logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
@@ -138,7 +138,7 @@ exports.createAdmin = (req, res, next) => {
   } else {
     // User already exist, so update him to adm
     req.userDB
-      .update(req.body)
+      .update(req.userToUpdate)
       .then(u => {
         const auth = sessionManager.encode({ email: u.email });
         res.status(200);
