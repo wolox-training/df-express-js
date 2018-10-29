@@ -1,4 +1,6 @@
-const errors = require('../errors');
+const errors = require('../errors'),
+  config = require('./../../config'),
+  paging = config.paging;
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
@@ -31,5 +33,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  User.getPagedUsers = (props, offset = paging.offset, limit = paging.limit) => {
+    return User.findAll({
+      where: props,
+      offset,
+      limit
+    }).catch(err => {
+      throw errors.databaseError(err.detail);
+    });
+  };
   return User;
 };

@@ -1,8 +1,9 @@
-const controller = require('./controllers/users');
+const userController = require('./controllers/users'),
+  authMiddleware = require('./middlewares/auth');
 
 exports.init = app => {
-  // app.get('/endpoint/get/path', [], controller.methodGET);
+  app.get('/users', [authMiddleware.tokenAuthentication], userController.userList);
   // app.put('/endpoint/put/path', [], controller.methodPUT);
-  app.post('/users', [], controller.create);
-  app.post('/users/sessions', [], controller.login);
+  app.post('/users', [], userController.create);
+  app.post('/users/sessions', [], userController.login);
 };

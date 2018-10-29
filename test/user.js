@@ -3,201 +3,169 @@ const chai = require('chai'),
   server = require('./../app'),
   should = chai.should(),
   User = require('./../app/models').user,
-  sessionManager = require('./../app/services/sessionManager');
+  sessionManager = require('./../app/services/sessionManager'),
+  usersList = require('./support/users').usersList;
+
+const createUser = userParams => {
+  return chai
+    .request(server)
+    .post('/users')
+    .send(userParams);
+};
+const logUser = userParams => {
+  return chai
+    .request(server)
+    .post('/users/sessions')
+    .send(userParams);
+};
 
 describe('users', () => {
   describe('/users POST', () => {
     it('should fail because email is missing or invalid', done => {
       User.count().then(cantUsers => {
-        chai
-          .request(server)
-          .post('/users')
-          .send({
-            firstName: 'Wanda',
-            lastName: 'Maximoff',
-            email: '',
-            password: '2wersdf34e'
-          })
-          .catch(err => {
-            User.count().then(cantUsersAfter => {
-              cantUsersAfter.should.be.eql(cantUsers);
-              err.should.have.status(400);
-              done();
-            });
+        createUser(usersList.userWithBadEmail).catch(err => {
+          User.count().then(cantUsersAfter => {
+            cantUsersAfter.should.be.eql(cantUsers);
+            err.should.have.status(400);
+            done();
           });
+        });
       });
     });
     it('should fail because email is in use', done => {
-      chai
-        .request(server)
-        .post('/users')
-        .send({
-          firstName: 'Tony',
-          lastName: 'Stark',
-          email: 'tony.stark@wolox.com.ar',
-          password: '123waerdfg'
-        })
-        .then(res => {
-          User.count().then(cantUsers => {
-            chai
-              .request(server)
-              .post('/users')
-              .send({
-                firstName: 'Peter',
-                lastName: 'Parker',
-                email: 'tony.stark@wolox.com.ar',
-                password: '123edfgbnm'
-              })
-              .catch(err => {
-                User.count().then(cantUsersAfter => {
-                  cantUsersAfter.should.be.eql(cantUsers);
-                  err.should.have.status(400);
-                  done();
-                });
-              });
-          });
-        });
-    });
-    it('should fail because password is too short', done => {
-      User.count().then(cantUsers => {
-        chai
-          .request(server)
-          .post('/users')
-          .send({
-            firstName: 'Reed',
-            lastName: 'Richard',
-            email: 'reed.richard@wolox.com.ar',
-            password: '2'
-          })
-          .catch(err => {
+      createUser(usersList.newUserOneCorrect).then(res => {
+        User.count().then(cantUsers => {
+          createUser(usersList.userOneCorrect).catch(err => {
             User.count().then(cantUsersAfter => {
               cantUsersAfter.should.be.eql(cantUsers);
               err.should.have.status(400);
               done();
             });
           });
+        });
+      });
+    });
+    it('should fail because password is too short', done => {
+      User.count().then(cantUsers => {
+        createUser(usersList.userWithShortPass).catch(err => {
+          User.count().then(cantUsersAfter => {
+            cantUsersAfter.should.be.eql(cantUsers);
+            err.should.have.status(400);
+            done();
+          });
+        });
       });
     });
     it('should fail because password is non-alphanumeric', done => {
       User.count().then(cantUsers => {
-        chai
-          .request(server)
-          .post('/users')
-          .send({
-            firstName: 'Juan',
-            lastName: 'Carlos',
-            email: 'juan.carlos@wolox.com.ar',
-            password: '123,&er.·'
-          })
-          .catch(err => {
-            User.count().then(cantUsersAfter => {
-              cantUsersAfter.should.be.eql(cantUsers);
-              err.should.have.status(400);
-              done();
-            });
+        createUser(usersList.userWithInvalidPass).catch(err => {
+          User.count().then(cantUsersAfter => {
+            cantUsersAfter.should.be.eql(cantUsers);
+            err.should.have.status(400);
+            done();
           });
+        });
       });
     });
     it('should be successful', done => {
       User.count().then(cantUsers => {
-        chai
-          .request(server)
-          .post('/users')
-          .send({
-            firstName: 'Stephen',
-            lastName: 'Strange',
-            email: 'steph.strange@wolox.com.ar',
-            password: '123waerdfg'
-          })
-          .then(res => {
-            User.count().then(cantUsersAfter => {
-              cantUsersAfter.should.be.eql(cantUsers + 1);
-              res.should.have.status(200);
-              res.should.be.json;
-              dictum.chai(res);
-              done();
-            });
+        createUser(usersList.newUserThreeCorrect).then(res => {
+          User.count().then(cantUsersAfter => {
+            cantUsersAfter.should.be.eql(cantUsers + 1);
+            res.should.have.status(200);
+            res.should.be.json;
+            dictum.chai(res);
+            done();
           });
+        });
       });
     });
   });
 
   describe('/users/sessions POST', () => {
     it('should fail login because of invalid email', done => {
-      chai
-        .request(server)
-        .post('/users/sessions')
-        .send({ email: 'invalidEmail', password: '123abc123' })
-        .catch(err => {
-          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(400);
-          done();
-        });
+      logUser(usersList.userWithBadEmail).catch(err => {
+        err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+        err.should.have.status(400);
+        done();
+      });
     });
 
     it('should fail login because email dose not exist', done => {
-      chai
-        .request(server)
-        .post('/users/sessions')
-        .send({ email: 'inexistent.email@wolox.com', password: '123abc123' })
-        .catch(err => {
-          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(400);
-          done();
-        });
+      logUser(usersList.userWithInexistentEmail).catch(err => {
+        err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+        err.should.have.status(400);
+        done();
+      });
     });
 
     it('should fail login because email is missing', done => {
-      chai
-        .request(server)
-        .post('/users/sessions')
-        .send({ password: '123abc123' })
-        .catch(err => {
-          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(400);
-          done();
-        });
+      logUser(usersList.userWithoutEmail).catch(err => {
+        err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+        err.should.have.status(400);
+        done();
+      });
     });
 
     it('should fail login because of invalid password', done => {
-      chai
-        .request(server)
-        .post('/users/sessions')
-        .send({ email: 'albert.albond@wolox.com.ar', password: '123' })
-        .catch(err => {
-          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(400);
-          done();
-        });
+      logUser(usersList.userWithInvalidPass).catch(err => {
+        err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+        err.should.have.status(400);
+        done();
+      });
     });
 
     it('should fail because user already logged in', done => {
-      chai
-        .request(server)
-        .post('/users/sessions')
-        .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
-        .then(res => {
-          chai
-            .request(server)
-            .post('/users/sessions')
-            .set('authorization', res.headers.authorization)
-            .send({ email: 'juan.juarroz@wolox.com.ar', password: '123456789' })
-            .catch(err => {
-              res.headers.should.have.property(sessionManager.HEADER_NAME);
-              err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-              err.should.have.status(400);
-              done();
-            });
-        });
+      logUser(usersList.userInDB).then(res => {
+        chai
+          .request(server)
+          .post('/users/sessions')
+          .set('authorization', res.headers.authorization)
+          .send({ email: 'albert.albond@wolox.com.ar', password: '123456789' })
+          .catch(err => {
+            res.headers.should.have.property(sessionManager.HEADER_NAME);
+            err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+            err.should.have.status(400);
+            done();
+          });
+      });
     });
     it('should be successful logged in', done => {
+      logUser(usersList.userInDB).then(res => {
+        res.headers.should.have.property(sessionManager.HEADER_NAME);
+        res.should.have.status(200);
+        done();
+      });
+    });
+  });
+});
+
+describe('/users GET', () => {
+  it('should get the User List successfully', done => {
+    logUser(usersList.userInDB).then(res => {
       chai
         .request(server)
-        .post('/users/sessions')
-        .send({ email: 'maxi.mon@wolox.com.ar', password: '123456789' })
-        .then(res => {
+        .get('/users?page=1&limit=2')
+        .set('authorization', res.headers.authorization)
+        .send({ email: 'albert.albond@wolox.com.ar', password: '123456789' })
+        .then(resolve => {
           res.headers.should.have.property(sessionManager.HEADER_NAME);
-          res.should.have.status(200);
+          resolve.body.length.should.be.eql(2);
+          resolve.should.have.status(200);
+          done();
+        });
+    });
+  });
+
+  it('should fail because User is not logged', done => {
+    createUser(usersList.newUserOneCorrect).then(res => {
+      chai
+        .request(server)
+        .get('/users?page=1&limit=2')
+        .send({ email: 'pet.parker@wolox.com.ar', password: '123abc123' })
+        .catch(err => {
+          err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+          err.should.have.status(401);
           done();
         });
     });
