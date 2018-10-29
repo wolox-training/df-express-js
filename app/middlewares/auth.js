@@ -71,7 +71,7 @@ exports.signUpValidation = (req, res, next) => {
         const saltRounds = 10;
         return bcrypt.hash(params.password, saltRounds).then(hash => {
           req.userDB = userDB;
-          params.password = hash
+          params.password = hash;
           req.userToUpdate = params;
           next();
         });

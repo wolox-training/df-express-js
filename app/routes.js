@@ -1,14 +1,14 @@
-const controller = require('./controllers/users'),
-  middleware = require('./middlewares/auth');
+const userController = require('./controllers/users'),
+  authMiddleware = require('./middlewares/auth');
 
 exports.init = app => {
-  app.get('/users', [middleware.tokenAuthentication], controller.userList);
+  app.get('/users', [authMiddleware.tokenAuthentication], userController.userList);
   // app.put('/endpoint/put/path', [], controller.methodPUT);
   app.post(
     '/admin/users',
-    [middleware.tokenAuthentication, middleware.adminAuthentication, middleware.signUpValidation],
-    controller.createAdmin
+    [authMiddleware.tokenAuthentication, authMiddleware.adminAuthentication, authMiddleware.signUpValidation],
+    userController.createAdmin
   );
-  app.post('/users', [], controller.create);
-  app.post('/users/sessions', [], controller.login);
+  app.post('/users', [], userController.create);
+  app.post('/users/sessions', [], userController.login);
 };

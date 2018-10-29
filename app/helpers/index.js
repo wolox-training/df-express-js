@@ -1,11 +1,10 @@
 exports.usersToShow = users => {
-  const userToShow = [];
-  users.forEach(params => {
-    userToShow.push({
+  const userToShow = users.map(params => {
+    return {
       firstName: params.firstName,
       lastName: params.lastName,
       email: params.email
-    });
+    };
   });
   return userToShow;
 };

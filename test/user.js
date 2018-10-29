@@ -172,7 +172,7 @@ describe('/users GET', () => {
         .send({ email: 'pet.parker@wolox.com.ar', password: '123abc123' })
         .catch(err => {
           err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-          err.should.have.status(498);
+          err.should.have.status(401);
           done();
         });
     });
@@ -185,7 +185,7 @@ describe('/users GET', () => {
           userDB.reload().then(reloadDB => {
             reloadDB.isAdmin.should.be.eql(false);
             err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
-            err.should.have.status(498);
+            err.should.have.status(401);
             done();
           });
         });
