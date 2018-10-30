@@ -22,7 +22,7 @@ exports.INVALID_PASSWORD_ERROR = 'Invalid Password';
 exports.invalidPasswordError = { statusCode: 400, message: exports.INVALID_PASSWORD_ERROR };
 
 exports.INVALID_TOKEN_AUTH = 'You are not logged';
-exports.invalidTokenAuth = { statusCode: 498, message: exports.INVALID_TOKEN_AUTH };
+exports.invalidTokenAuth = { statusCode: 401, message: exports.INVALID_TOKEN_AUTH };
 
 exports.BAD_PASS_REQ = 'not password send';
 exports.badPassReq = { statusCode: 400, message: exports.BAD_PASS_REQ };

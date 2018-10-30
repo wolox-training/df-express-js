@@ -38,7 +38,7 @@ describe('albums', () => {
       actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
         actionToDo.getAlbumsInfo().catch(err => {
           err.response.body.should.not.have.property('userId');
-          err.should.have.status(498);
+          err.should.have.status(401);
           done();
         });
       });

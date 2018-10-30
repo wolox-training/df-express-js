@@ -129,7 +129,7 @@ exports.createAdmin = (req, res, next) => {
       User.create(req.newUser)
         .then(newUser => {
           logger.info(`User with email ${newUser.email} correctly created`);
-          res.status(200).send({ newUser });
+          res.status(201).send({ newUser });
         })
         .catch(error => {
           logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
@@ -139,10 +139,10 @@ exports.createAdmin = (req, res, next) => {
   } else {
     // User already exist, so update him to adm
     req.userDB
-      .update(req.body)
-      .then(user => {
+      .update(req.userToUpdate)
+      .then(userUpdated => {
         res.status(200);
-        res.send({ 'User Updated': user });
+        res.send({ User: userUpdated });
       })
       .catch(next);
   }
