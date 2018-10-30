@@ -118,3 +118,31 @@ exports.userList = (req, res, next) => {
       next(error);
     });
 };
+
+exports.createAdmin = (req, res, next) => {
+  if (req.newUser) {
+    // Create a new Admin User
+    const saltRounds = 10;
+    bcrypt.hash(req.newUser.password, saltRounds).then(hash => {
+      req.newUser.password = hash;
+      User.create(req.newUser)
+        .then(newUser => {
+          logger.info(`User with email ${newUser.email} correctly created`);
+          res.status(201).send({ newUser });
+        })
+        .catch(error => {
+          logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
+          next(error);
+        });
+    });
+  } else {
+    // User already exist, so update him to adm
+    req.userDB
+      .update(req.userToUpdate)
+      .then(userUpdated => {
+        res.status(200);
+        res.send({ User: userUpdated });
+      })
+      .catch(next);
+  }
+};

@@ -19,6 +19,13 @@ const logUser = userParams => {
     .send(userParams);
 };
 
+const createAdmin = userParams => {
+  return chai
+    .request(server)
+    .post('/admin/users')
+    .send(userParams);
+};
+
 describe('users', () => {
   describe('/users POST', () => {
     it('should fail because email is missing or invalid', done => {
@@ -121,7 +128,7 @@ describe('users', () => {
           .request(server)
           .post('/users/sessions')
           .set('authorization', res.headers.authorization)
-          .send({ email: 'albert.albond@wolox.com.ar', password: '123456789' })
+          .send({ email: 'maxi.mon@wolox.com.ar', password: '123456789' })
           .catch(err => {
             res.headers.should.have.property(sessionManager.HEADER_NAME);
             err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
@@ -168,6 +175,93 @@ describe('/users GET', () => {
           err.should.have.status(401);
           done();
         });
+    });
+  });
+
+  describe('/admin/users POST', () => {
+    it('should fail because user is not logged', done => {
+      User.findOne({ where: { email: 'maxi.mon@wolox.com.ar' } }).then(userDB => {
+        createAdmin(usersList.userInDB).catch(err => {
+          userDB.reload().then(reloadDB => {
+            reloadDB.isAdmin.should.be.eql(false);
+            err.response.headers.should.not.have.property(sessionManager.HEADER_NAME);
+            err.should.have.status(401);
+            done();
+          });
+        });
+      });
+    });
+    it('should fail because Name does not match', done => {
+      logUser(usersList.adminUserInDB).then(userLog => {
+        User.findOne({ where: { email: 'juan.juarroz@wolox.com.ar' } }).then(userDB => {
+          createAdmin(usersList.userInDBwrongName)
+            .set('authorization', userLog.headers.authorization)
+            .catch(err => {
+              userDB.reload().then(reloadUserDB => {
+                reloadUserDB.isAdmin.should.be.eql(false);
+                reloadUserDB.firstName.should.be.eql('Juan');
+                err.should.have.status(400);
+                done();
+              });
+            });
+        });
+      });
+    });
+    it('should fail because password does not match', done => {
+      logUser(usersList.adminUserInDB).then(userLog => {
+        User.findOne({ where: { email: 'juan.juarroz@wolox.com.ar' } }).then(userDB => {
+          createAdmin(usersList.userInDBwrongPassword)
+            .set('authorization', userLog.headers.authorization)
+            .catch(err => {
+              userDB.reload().then(reloadUserDB => {
+                reloadUserDB.isAdmin.should.be.eql(false);
+                err.should.have.status(400);
+                done();
+              });
+            });
+        });
+      });
+    });
+    it('should fail because user is not admin', done => {
+      logUser(usersList.userInDB).then(userLog => {
+        User.findOne({ where: { email: 'maxi.mon@wolox.com.ar' } }).then(userDB => {
+          createAdmin(usersList.userInDB)
+            .set('authorization', userLog.headers.authorization)
+            .catch(err => {
+              userDB.reload().then(reloadUserDB => {
+                reloadUserDB.isAdmin.should.be.eql(false);
+                err.should.have.status(401);
+                done();
+              });
+            });
+        });
+      });
+    });
+    it('New Admin Should be succesfully Created', done => {
+      logUser(usersList.adminUserInDB).then(userLog => {
+        createAdmin(usersList.newAdmin)
+          .set('authorization', userLog.headers.authorization)
+          .then(newAdm => {
+            User.findOne({ where: { email: usersList.newAdmin.email } }).then(newUserAdm => {
+              newUserAdm.isAdmin.should.be.eql(true);
+              newAdm.should.have.status(201);
+              done();
+            });
+          });
+      });
+    });
+    it('Admin Should be succesfully UpDated', done => {
+      logUser(usersList.adminUserInDB).then(userLog => {
+        createAdmin(usersList.updateUserToAdmin)
+          .set('authorization', userLog.headers.authorization)
+          .then(newAdm => {
+            User.findOne({ where: { email: usersList.updateUserToAdmin.email } }).then(upDateUserAdm => {
+              upDateUserAdm.isAdmin.should.be.eql(true);
+              newAdm.should.have.status(200);
+              done();
+            });
+          });
+      });
     });
   });
 });
