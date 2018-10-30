@@ -139,11 +139,9 @@ exports.createAdmin = (req, res, next) => {
     // User already exist, so update him to adm
     req.userDB
       .update(req.userToUpdate)
-      .then(u => {
-        const auth = sessionManager.encode({ email: u.email });
+      .then(userUpdated => {
         res.status(200);
-        res.set(sessionManager.HEADER_NAME, auth);
-        res.send(u);
+        res.send({ User: userUpdated });
       })
       .catch(next);
   }
