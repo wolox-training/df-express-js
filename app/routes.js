@@ -1,22 +1,20 @@
-const controller = require('./controllers/users'),
-  controllerAlbums = require('./controllers/albums'),
-  middleware = require('./middlewares/auth'),
-  authAlbumBuy = require('./services/purchase-auth');
+const userController = require('./controllers/users'),
+  authMiddleware = require('./middlewares/auth'),
+  albumsController = require('./controllers/albums');
 
 exports.init = app => {
-  app.get('/users', [middleware.tokenAuthentication], controller.userList);
-  // app.put('/endpoint/put/path', [], controller.methodPUT);
+  app.get('/users', [authMiddleware.tokenAuthentication], userController.userList);
   app.post(
     '/admin/users',
-    [middleware.tokenAuthentication, middleware.adminAuthentication, middleware.signUpValidation],
-    controller.createAdmin
+    [authMiddleware.tokenAuthentication, authMiddleware.adminAuthentication, authMiddleware.signUpValidation],
+    userController.createAdmin
   );
-  app.post('/users', [], controller.create);
-  app.post('/users/sessions', [], controller.login);
   app.post(
     '/albums/:id',
-    [middleware.tokenAuthentication, authAlbumBuy.getAndValidateAlbum],
-    controllerAlbums.buyAlbum
+    [authMiddleware.tokenAuthentication, authMiddleware.validateAlbumBuy],
+    albumsController.buyAlbum
   );
-  app.get('/albums', [middleware.tokenAuthentication], controllerAlbums.getAlbums);
+  app.post('/users', [], userController.create);
+  app.post('/users/sessions', [], userController.login);
+  app.get('/albums', [authMiddleware.tokenAuthentication], albumsController.getAlbums);
 };

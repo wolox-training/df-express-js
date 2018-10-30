@@ -3,6 +3,7 @@ const sessionManager = require('./../services/sessionManager'),
   errors = require('../errors'),
   bcrypt = require('bcryptjs'),
   Album = require('../models').album,
+  allAlbums = require('./../services/albums'),
   logger = require('../logger');
 
 exports.tokenAuthentication = (req, res, next) => {
@@ -38,7 +39,8 @@ exports.signUpValidation = (req, res, next) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         password: req.body.password,
-        email: req.body.email
+        email: req.body.email,
+        isAdmin: true
       }
     : {};
   const regex = new RegExp('^[0-9A-Za-z]+$');
@@ -58,20 +60,21 @@ exports.signUpValidation = (req, res, next) => {
     logger.info(`User has an invalid password`);
     return next(errors.invalidPasswordError);
   }
-  User.findOne({ where: { email: params.email } }).then(userDB => {
+  return User.findOne({ where: { email: params.email } }).then(userDB => {
     if (!userDB) {
-      req.newUser = req.body;
+      req.newUser = params;
       return next();
     }
     if (userDB.firstName !== params.firstName || userDB.lastName !== params.lastName) {
       return next(errors.invalidName);
     }
-    bcrypt.compare(params.password, userDB.password).then(isValid => {
+    return bcrypt.compare(params.password, userDB.password).then(isValid => {
       if (isValid) {
         const saltRounds = 10;
-        bcrypt.hash(params.password, saltRounds).then(hash => {
+        return bcrypt.hash(params.password, saltRounds).then(hash => {
           req.userDB = userDB;
-          req.body.password = hash;
+          params.password = hash;
+          req.userToUpdate = params;
           next();
         });
       } else {
@@ -79,4 +82,25 @@ exports.signUpValidation = (req, res, next) => {
       }
     });
   });
+};
+
+exports.validateAlbumBuy = (req, res, next) => {
+  const albumId = req.params.id;
+  logger.info(`The User ${req.adminUser.firstName} request the album ${albumId}`);
+  return allAlbums
+    .getAnAlbum(albumId)
+    .then(selectedAlbum => {
+      return Album.findOne({ where: { id: albumId, user_id: req.adminUser.id } }).then(alreadyBuy => {
+        if (alreadyBuy) {
+          return next(errors.albumAlreadyPurchased);
+        } else {
+          req.albumToBuy = selectedAlbum;
+          return next();
+        }
+      });
+    })
+    .catch(error => {
+      console.log(error);
+      next(error);
+    });
 };

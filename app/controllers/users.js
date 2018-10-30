@@ -3,7 +3,6 @@ const logger = require('../logger'),
   bcrypt = require('bcryptjs'),
   errors = require('../errors'),
   usersToShow = require('./../helpers/index').usersToShow,
-  axios = require('axios'),
   sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
@@ -129,7 +128,7 @@ exports.createAdmin = (req, res, next) => {
       User.create(req.newUser)
         .then(newUser => {
           logger.info(`User with email ${newUser.email} correctly created`);
-          res.status(200).send({ newUser });
+          res.status(201).send({ newUser });
         })
         .catch(error => {
           logger.error(`Database Error. Details: ${JSON.stringify(error)}`);
@@ -139,12 +138,10 @@ exports.createAdmin = (req, res, next) => {
   } else {
     // User already exist, so update him to adm
     req.userDB
-      .update(req.body)
-      .then(u => {
-        const auth = sessionManager.encode({ email: u.email });
+      .update(req.userToUpdate)
+      .then(userUpdated => {
         res.status(200);
-        res.set(sessionManager.HEADER_NAME, auth);
-        res.send(u);
+        res.send({ User: userUpdated });
       })
       .catch(next);
   }

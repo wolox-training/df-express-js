@@ -1,24 +1,21 @@
 const logger = require('../logger'),
   errors = require('../errors'),
   axios = require('axios'),
+  allAlbums = require('./../services/albums'),
   Album = require('../models').album;
 
 exports.getAlbums = (req, res, next) => {
-  axios
-    .get('https://jsonplaceholder.typicode.com/albums')
-    .then(response => {
-      logger.info(`All albums were listed succesfully`);
-      res.send(response.data);
+  return allAlbums
+    .getAlbums()
+    .then(albumsList => {
+      logger.info(`All albums listed succesfully`);
+      res.send({ albums: albumsList });
       res.status(200);
     })
-    .catch(error => {
-      logger.error(`JSONPlaceholder API Error. Details:${JSON.stringify(error)}`);
-      next(error);
-    });
+    .catch(next);
 };
 
 exports.buyAlbum = (req, res, next) => {
-  logger.info(`The User ${req.adminUser.firstName} is about to buy an album`);
   const albumToPurchase = {
     albumId: req.albumToBuy.id,
     userId: req.adminUser.id,
@@ -27,7 +24,7 @@ exports.buyAlbum = (req, res, next) => {
   return Album.create(albumToPurchase)
     .then(purchasedAlbum => {
       logger.info(`The album ${purchasedAlbum.albumTitle} correctly purchased`);
-      res.status(200).send({ purchasedAlbum });
+      res.status(200).send({ 'New Album': purchasedAlbum });
     })
     .catch(error => {
       logger.error(`Database Error. Details: ${JSON.stringify(error.message)}`);

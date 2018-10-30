@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs'),
-  Album = require('../app/models').album,
   User = require('../app/models').user;
 
 exports.execute = () => {

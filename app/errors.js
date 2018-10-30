@@ -41,3 +41,7 @@ exports.albumAlreadyPurchased = { statusCode: 400, message: exports.ALBUM_ALREAD
 
 exports.INEXISTENT_ALBUM = 'Albums does not exist';
 exports.inexistentAlbum = { statusCode: 404, message: exports.INEXISTENT_ALBUM };
+
+exports.externalApi = message => {
+  return { statusCode: 503, message: `The external api error is not available, actual error: ${message}` };
+};
