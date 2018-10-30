@@ -1,5 +1,6 @@
 const chai = require('chai'),
-  User = require('../../app/models').user;
+  User = require('../../app/models').user,
+  server = require('./../../app');
 
 exports.usersList = {
   newUserOneCorrect: {
@@ -89,4 +90,29 @@ exports.usersList = {
     email: 'emma.frost@wolox.com.ar',
     password: '$.re+·¿"@!d'
   }
+};
+
+exports.logUser = userParams => {
+  return chai
+    .request(server)
+    .post('/users/sessions')
+    .send(userParams);
+};
+
+exports.createUser = userParams => {
+  return chai
+    .request(server)
+    .post('/users')
+    .send(userParams);
+};
+
+exports.createAdmin = userParams => {
+  return chai
+    .request(server)
+    .post('/admin/users')
+    .send(userParams);
+};
+
+exports.getAlbumsInfo = () => {
+  return chai.request(server).get('/albums');
 };
