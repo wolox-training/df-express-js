@@ -54,7 +54,7 @@ const config = {
       offset: process.env.PAGINATION_OFFSET || 0
     },
     jsonPlaceHolder: {
-      url: 'https://jsonplaceholder.typicode.com/albums'
+      url: process.env.JSONP_PLACE_HOLDER_URL
     }
   }
 };

@@ -7,6 +7,9 @@ exports.config = {
     },
     session: {
       secret: 'some-super-secret'
+    },
+    jsonPlaceHolder: {
+      url: 'https://jsonplaceholder.typicode.com/albums'
     }
   }
 };
