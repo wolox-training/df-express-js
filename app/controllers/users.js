@@ -3,6 +3,7 @@ const logger = require('../logger'),
   bcrypt = require('bcryptjs'),
   errors = require('../errors'),
   usersToShow = require('./../helpers/index').usersToShow,
+  getAllAlbums = require('./../services/albums').getAlbums,
   sessionManager = require('./../services/sessionManager');
 
 exports.create = (req, res, next) => {
@@ -145,4 +146,14 @@ exports.createAdmin = (req, res, next) => {
       })
       .catch(next);
   }
+};
+
+exports.getAlbums = (req, res, next) => {
+  return getAllAlbums()
+    .then(albumsList => {
+      logger.info(`All albums listed succesfully`);
+      res.send({ albums: albumsList });
+      res.status(200);
+    })
+    .catch(next);
 };

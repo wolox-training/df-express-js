@@ -35,3 +35,7 @@ exports.invalidName = { statusCode: 400, message: exports.INVALID_NAME };
 
 exports.NOT_ADMIN_USER = 'User does not have admin Permissions';
 exports.notAdminUser = { statusCode: 401, message: exports.NOT_ADMIN_USER };
+
+exports.externalApi = message => {
+  return { statusCode: 503, message: `The external api error is not available, actual error: ${message}` };
+};

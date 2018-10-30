@@ -52,6 +52,9 @@ const config = {
     paging: {
       limit: process.env.PAGINATION_LIMIT || 5,
       offset: process.env.PAGINATION_OFFSET || 0
+    },
+    jsonPlaceHolder: {
+      url: process.env.JSONP_PLACE_HOLDER_URL
     }
   }
 };
