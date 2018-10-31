@@ -17,4 +17,9 @@ exports.init = app => {
   app.post('/users', [], userController.create);
   app.post('/users/sessions', [], userController.login);
   app.get('/albums', [authMiddleware.tokenAuthentication], albumsController.getAlbums);
+  app.get(
+    '/users/:user_id/albums',
+    [authMiddleware.tokenAuthentication, authMiddleware.validateAlbumsOwner],
+    albumsController.purchasedAlbums
+  );
 };

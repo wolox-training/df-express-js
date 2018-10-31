@@ -31,3 +31,14 @@ exports.buyAlbum = (req, res, next) => {
       return next(errors.inexistentAlbum);
     });
 };
+
+exports.purchasedAlbums = (req, res, next) => {
+  return Album.findAll({ where: { user_id: req.params.user_id } })
+    .then(albums => {
+      res.status(200).send({ 'Albums: ': albums });
+    })
+    .catch(error => {
+      logger.error(`Database Error. Details: ${JSON.stringify(error.message)}`);
+      return next(error);
+    });
+};

@@ -45,3 +45,6 @@ exports.inexistentAlbum = { statusCode: 404, message: exports.INEXISTENT_ALBUM }
 exports.externalApi = message => {
   return { statusCode: 503, message: `The external api error is not available, actual error: ${message}` };
 };
+
+exports.INVALID_OWNERSHIP = 'You are not the owner of the albums requested';
+exports.invalidOwnership = { statusCode: 401, message: exports.INVALID_OWNERSHIP };

@@ -126,3 +126,7 @@ exports.getAlbumsInfo = () => {
 exports.buyAlbum = albumId => {
   return chai.request(server).post(`/albums/${albumId}`);
 };
+
+exports.getAlbumsPurchased = userId => {
+  return chai.request(server).get(`/users/${userId}/albums`);
+};

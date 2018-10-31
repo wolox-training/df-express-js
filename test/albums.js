@@ -139,4 +139,81 @@ describe('albums', () => {
       });
     });
   });
+
+  describe('/users/:user_id/albums GET', () => {
+    it('should fail getting the albums because User is neither the owner nor admin', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo
+              .getAlbumsPurchased(1)
+              .set('authorization', userLog.headers.authorization)
+              .catch(err => {
+                err.should.have.status(401);
+                done();
+              });
+          });
+      });
+    });
+    it('should get the albums succesfully because user is the owner', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo
+              .getAlbumsPurchased(3)
+              .set('authorization', userLog.headers.authorization)
+              .then(resolve => {
+                resolve.should.have.status(200);
+                dictum.chai(res);
+                done();
+              });
+          });
+      });
+    });
+
+    it('should get the albums succesfully because user is admin', done => {
+      const couchdb = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'omnis laborum odio'
+        });
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo.logUser(actionToDo.usersList.userWithOneAlbum).then(adminUser => {
+              actionToDo
+                .getAlbumsPurchased(3)
+                .set('authorization', adminUser.headers.authorization)
+                .then(resolve => {
+                  resolve.should.have.status(200);
+                  dictum.chai(res);
+                  done();
+                });
+            });
+          });
+      });
+    });
+  });
 });

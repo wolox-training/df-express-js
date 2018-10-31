@@ -8,7 +8,6 @@ const sessionManager = require('./../services/sessionManager'),
 
 exports.tokenAuthentication = (req, res, next) => {
   const auth = req.headers[sessionManager.HEADER_NAME];
-
   if (auth) {
     const email = sessionManager.decode(auth);
     User.findOne({ where: email }).then(logUser => {
@@ -100,7 +99,15 @@ exports.validateAlbumBuy = (req, res, next) => {
       });
     })
     .catch(error => {
-      console.log(error);
       next(error);
     });
+};
+
+exports.validateAlbumsOwner = (req, res, next) => {
+  const userId = req.params.user_id;
+  if (req.adminUser.isAdmin || parseInt(userId) === req.adminUser.id) {
+    return next();
+  } else {
+    return next(errors.invalidOwnership);
+  }
 };
