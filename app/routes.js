@@ -19,7 +19,12 @@ exports.init = app => {
   app.get('/albums', [authMiddleware.tokenAuthentication], albumsController.getAlbums);
   app.get(
     '/users/:user_id/albums',
-    [authMiddleware.tokenAuthentication, authMiddleware.validateAlbumsOwner],
+    [authMiddleware.tokenAuthentication, authMiddleware.userValidation],
     albumsController.purchasedAlbums
+  );
+  app.get(
+    '/users/albums/:id/photos',
+    [authMiddleware.tokenAuthentication, authMiddleware.albumsOwnerValidation],
+    albumsController.getAlbumsPhotos
   );
 };

@@ -25,3 +25,15 @@ exports.getAnAlbum = albumId => {
       throw errors.externalApi(error.message);
     });
 };
+
+exports.getAlbumsPhoto = albumId => {
+  return axios
+    .get(`${jsonPlaceHolder.url}/${albumId}/photos`)
+    .then(selectedPhoto => {
+      return selectedPhoto.data;
+    })
+    .catch(error => {
+      if (error.response.status === 404) throw errors.inexistentAlbum;
+      throw errors.externalApi(error.message);
+    });
+};

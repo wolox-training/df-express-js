@@ -42,3 +42,16 @@ exports.purchasedAlbums = (req, res, next) => {
       return next(error);
     });
 };
+
+exports.getAlbumsPhotos = (req, res, next) => {
+  return allAlbums
+    .getAlbumsPhoto(req.params.id)
+    .then(albumsPhotoList => {
+      logger.info(`Photos listed succesfully`);
+      res.send({ photos: albumsPhotoList });
+      res.status(200);
+    })
+    .catch(error => {
+      return next(error);
+    });
+};

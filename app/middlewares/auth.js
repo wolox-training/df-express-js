@@ -103,11 +103,22 @@ exports.validateAlbumBuy = (req, res, next) => {
     });
 };
 
-exports.validateAlbumsOwner = (req, res, next) => {
+exports.userValidation = (req, res, next) => {
   const userId = req.params.user_id;
   if (req.adminUser.isAdmin || parseInt(userId) === req.adminUser.id) {
     return next();
   } else {
     return next(errors.invalidOwnership);
   }
+};
+
+exports.albumsOwnerValidation = (req, res, next) => {
+  const albumId = req.params.id;
+  return Album.findOne({ where: { id: albumId, user_id: req.adminUser.id } }).then(albumPurchased => {
+    if (albumPurchased) {
+      return next();
+    } else {
+      return next(errors.invalidOwnership);
+    }
+  });
 };

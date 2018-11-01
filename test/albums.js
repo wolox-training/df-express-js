@@ -216,4 +216,81 @@ describe('albums', () => {
       });
     });
   });
+
+  describe('/users/albums/:id/photos GET', () => {
+    beforeEach(() => {
+      const getAlbum = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1')
+        .reply(200, {
+          userId: 1,
+          id: 1,
+          title: 'quidem molestiae enim'
+        });
+      const getAlbumsPhoto = nock('https://jsonplaceholder.typicode.com/albums')
+        .get('/1/photos')
+        .reply(200, [
+          {
+            albumId: 1,
+            id: 1,
+            title: 'accusamus beatae ad facilis cum similique qui sunt',
+            url: 'https://via.placeholder.com/600/92c952',
+            thumbnailUrl: 'https://via.placeholder.com/150/92c952'
+          },
+          {
+            albumId: 1,
+            id: 2,
+            title: 'reprehenderit est deserunt velit ipsam',
+            url: 'https://via.placeholder.com/600/771796',
+            thumbnailUrl: 'https://via.placeholder.com/150/771796'
+          }
+        ]);
+    });
+    it('should get the photos succesfully', done => {
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo
+              .getAlbumsPhotos(1)
+              .set('authorization', userLog.headers.authorization)
+              .then(resolve => {
+                resolve.should.have.status(200);
+                resolve.body.photos.length.should.be.eql(2);
+                dictum.chai(resolve);
+                done();
+              });
+          });
+      });
+    });
+    it('should fail getting the photos because User is not the owner', done => {
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo
+              .getAlbumsPhotos(2)
+              .set('authorization', userLog.headers.authorization)
+              .catch(err => {
+                err.should.have.status(401);
+                done();
+              });
+          });
+      });
+    });
+    it('should fail getting the photos because User is not logged', done => {
+      actionToDo.logUser(actionToDo.usersList.userInDB).then(userLog => {
+        actionToDo
+          .buyAlbum(1)
+          .set('authorization', userLog.headers.authorization)
+          .then(res => {
+            actionToDo.getAlbumsPhotos(1).catch(err => {
+              err.should.have.status(401);
+              done();
+            });
+          });
+      });
+    });
+  });
 });
